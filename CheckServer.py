@@ -37,14 +37,16 @@ class CheckServerCommand(sublime_plugin.WindowCommand):
             self.window.show_input_panel("Password:","",self.done_password,None,self.cancel)
     def fetch_data(self):
         print(self.data)
-        bs64 = base64.encodestring(('%s:%s' % (self.username,self.password)).encode('utf-8'))[:-1]
+        #bs64 = base64.encodestring(('%s:%s' % (self.username,self.password)).encode('utf-8'))[:-1]
         url = self.data['uri'] or "https://api.enterprise.apigee.com"
         password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
         password_mgr.add_password(None, url,self.username,self.password)
         handler = urllib.request.HTTPBasicAuthHandler(password_mgr)
         opener = urllib.request.build_opener(handler)
-        opener.open("%s/v1/o/%s/environments/%s/targetservers" %(url,self.org,self.env))
-        print(opener.read())
+        req = urllib.request.Request("%s/v1/o/%s/environments/%s/targetservers" %(url,self.org,self.env))
+        print(req.get_full_url())
+        res =opener.open(req).read()
+        print(res)
 
 
 
