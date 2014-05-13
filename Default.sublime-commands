@@ -24,6 +24,10 @@
     {
         "caption":"Apigee: Add Flow to Proxy",
         "command":"add_flow"
+    },
+    {
+        "caption":"Apigee: Check Target Server",
+        "command":"check_server"
     }
 
 ]
