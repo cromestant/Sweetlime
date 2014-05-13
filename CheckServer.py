@@ -3,30 +3,41 @@ import sublime_plugin
 import json
 
 class CheckServerCommand(sublime_plugin.WindowCommand):
-    data ={"org": False, "username":False}
+      #data ={"org": False, "username":False}
     def run(self):
-        print("run")
+        json_data=open(self.window.folders()[0]+'/deploy_vars.json')
+        self.data = json.load(json_data)
+        json_data.close()
+        print(self.data)
         self.getOrg()
     def getOrg(self):
-    	print('in org')
-    	if self.data['org']:
-    		print("got org")
-    		self.org = self.data['org']
-    	else:
-    		self.window.show_input_panel("Org name:","",self.done_org,None,self.cancel)
+        if self.data['org']:
+            self.org = self.data['org']
+            self.getUser()
+        else:
+            self.window.show_input_panel("Org name:","",self.done_org,None,self.cancel)
     def getUser(self):
-    	print("in get user")
-    	if self.data['username']:
-    		print("got user")
-    		self.username = self.data['username']
-    	else:
-    		self.window.show_input_panel("Username:","",self.done_user,None,self.cancel)
+        if self.data['username']:
+            self.username = self.data['username']
+            self.getPassword()
+        else:
+            self.window.show_input_panel("Username:","",self.done_user,None,self.cancel)
+    def getPassword(self):
+        if self.data['password']:
+            self.password=self.data['password']
+            self.fetch_data()
+        else:
+            self.window.show_input_panel("Password:","",self.done_password,None,self.cancel)
+    def fetch_data(self):
+    	print(self.data)
     def done_org(self,data):
-    	print("in done Org")
-    	self.org= data
-    	self.getUser();
+        self.org= data
+        self.getUser();
     def done_user(self,data):
-    	print('in done user')
-    	self.username= data
+        self.username= data
+        self.getPassword()
+    def done_password(self,data):
+        self.password= data
+        self.fetch_data()
     def cancel(self):
-    	print("user cancelled")
+        print("user cancelled")
