@@ -1,6 +1,7 @@
 import sublime
 import sublime_plugin
-import json
+import json,base64
+import urllib.request, urllib.parse
 
 class CheckServerCommand(sublime_plugin.WindowCommand):
       #data ={"org": False, "username":False}
@@ -13,9 +14,15 @@ class CheckServerCommand(sublime_plugin.WindowCommand):
     def getOrg(self):
         if self.data['org']:
             self.org = self.data['org']
-            self.getUser()
+            self.getEnv()
         else:
             self.window.show_input_panel("Org name:","",self.done_org,None,self.cancel)
+    def getEnv(self):
+        if self.data['env']:
+            self.env = self.data['env']
+            self.getUser()
+        else:
+            self.window.show_input_panel("Environment:","",self.done_env,None,self.cancel)
     def getUser(self):
         if self.data['username']:
             self.username = self.data['username']
@@ -29,10 +36,26 @@ class CheckServerCommand(sublime_plugin.WindowCommand):
         else:
             self.window.show_input_panel("Password:","",self.done_password,None,self.cancel)
     def fetch_data(self):
-    	print(self.data)
+        print(self.data)
+        bs64 = base64.encodestring(('%s:%s' % (self.username,self.password)).encode('utf-8'))[:-1]
+        url = self.data['uri'] or "https://api.enterprise.apigee.com"
+        password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
+        password_mgr.add_password(None, url,self.username,self.password)
+        handler = urllib.request.HTTPBasicAuthHandler(password_mgr)
+        opener = urllib.request.build_opener(handler)
+        opener.open("%s/v1/o/%s/environments/%s/targetservers" %(url,self.org,self.env))
+        print(opener.read())
+
+
+
+        #sublime.message_dialog("Message goes here.")
+
+    def done_env(self,data):
+        self.env =env
+        self.getUser()
     def done_org(self,data):
         self.org= data
-        self.getUser();
+        self.getEnv()
     def done_user(self,data):
         self.username= data
         self.getPassword()
